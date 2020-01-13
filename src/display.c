@@ -187,11 +187,30 @@ static void
 redraw_display_separator(bool clear)
 {
 	if (display_sep) {
-		chtype separator = opt_line_graphics ? ACS_VLINE : '|';
+		chtype separator;
+
+		switch (opt_line_graphics) {
+		case GRAPHIC_ASCII:
+			separator = '|';
+			break;
+		case GRAPHIC_DEFAULT:
+			separator = ACS_VLINE;
+			break;
+		case GRAPHIC_UTF_8:
+			separator = ' ';
+			break;
+		}
 
 		if (clear)
 			wclear(display_sep);
 		wbkgd(display_sep, separator + get_line_attr(NULL, LINE_TITLE_BLUR));
+
+		if (opt_line_graphics == GRAPHIC_UTF_8) {
+			int lineno = 0;
+
+			while (mvwaddstr(display_sep, lineno++, 0, "│") == OK);
+		}
+
 		wnoutrefresh(display_sep);
 	}
 }
